@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FreshVault – Smarte Kühlschrank-Organisation</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --green:#2d6a4f;--green-light:#40916c;--green-dark:#1b4332;--green-xdark:#0d2117;
+  --green-bg:#d8f3dc;--green-mid:#b7e4c7;--accent:#52b788;
+  --text:#0f1923;--muted:#6b7280;--white:#fff;--off-white:#f8fdf9;--border:#e2e8e5;
+  --radius:20px;--radius-sm:12px;
+  --shadow-sm:0 2px 8px rgba(0,0,0,.06);
+  --shadow:0 4px 28px rgba(45,106,79,.13);
+  --shadow-lg:0 16px 56px rgba(45,106,79,.22);
+  --shadow-xl:0 32px 80px rgba(45,106,79,.3);
+  --t:.3s cubic-bezier(.4,0,.2,1);
+  --t-slow:.6s cubic-bezier(.4,0,.2,1);
+}
+
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;color:var(--text);background:var(--white);overflow-x:hidden}
+
+/* ── TYPOGRAPHY ─────────────────────────────────── */
+.section-title{font-size:clamp(2rem,4.5vw,3rem);font-weight:900;line-height:1.1;letter-spacing:-.04em}
+.section-sub{font-size:1.1rem;color:var(--muted);margin-top:14px;max-width:560px;line-height:1.7}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:6px 16px;border-radius:50px;font-size:.75rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;background:var(--green-bg);color:var(--green-dark);margin-bottom:18px}
+.container{max-width:1120px;margin:0 auto;padding:0 24px}
+section{padding:100px 0}
+
+/* ── BUTTONS ─────────────────────────────────────── */
+.btn{
+  position:relative;overflow:hidden;
+  display:inline-flex;align-items:center;gap:8px;
+  padding:16px 36px;border-radius:50px;font-size:1rem;font-weight:700;
+  cursor:pointer;border:none;text-decoration:none;line-height:1;
+  transition:transform var(--t),box-shadow var(--t),background var(--t);
+}
+.btn::after{
+  content:'';position:absolute;top:0;left:-110%;width:55%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.28),transparent);
+  transform:skewX(-20deg);transition:none;pointer-events:none;
+}
+.btn:hover::after{animation:shimmer .55s ease forwards}
+.btn:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+.btn:active{transform:translateY(-1px) scale(.98)}
+.btn-primary{background:var(--green);color:#fff;box-shadow:0 6px 24px rgba(45,106,79,.4)}
+.btn-primary:hover{background:var(--green-light)}
+.btn-outline{background:transparent;color:var(--green);border:2px solid var(--green)}
+.btn-outline:hover{background:var(--green-bg);box-shadow:var(--shadow)}
+@keyframes shimmer{from{left:-110%}to{left:200%}}
+
+/* ripple */
+.ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.35);animation:ripple-expand .6s ease-out forwards;pointer-events:none}
+@keyframes ripple-expand{from{transform:scale(0);opacity:1}to{transform:scale(2.5);opacity:0}}
+
+/* ── NAV ─────────────────────────────────────────── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  transition:background var(--t),box-shadow var(--t),border-color var(--t);
+  border-bottom:1px solid transparent;
+}
+nav.scrolled{
+  background:rgba(255,255,255,.96);backdrop-filter:blur(20px);
+  border-color:var(--border);box-shadow:0 1px 0 rgba(0,0,0,.05),0 4px 24px rgba(0,0,0,.06);
+}
+.nav-inner{
+  display:flex;align-items:center;justify-content:space-between;
+  height:68px;max-width:1120px;margin:0 auto;padding:0 24px;
+}
+.logo{font-size:1.5rem;font-weight:900;letter-spacing:-.04em;text-decoration:none;color:#fff;transition:color var(--t)}
+.logo span{color:var(--accent)}
+nav.scrolled .logo{color:var(--green-dark)}
+.nav-links{display:flex;gap:32px;list-style:none}
+.nav-links a{font-size:.88rem;font-weight:600;color:rgba(255,255,255,.8);text-decoration:none;transition:color var(--t)}
+.nav-links a:hover{color:#fff}
+nav.scrolled .nav-links a{color:var(--muted)}
+nav.scrolled .nav-links a:hover{color:var(--green)}
+.nav-cta{padding:10px 22px;font-size:.88rem}
+/* nav button: white-outline on dark, green-solid on white */
+nav .btn-primary{background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.5);box-shadow:none}
+nav.scrolled .btn-primary{background:var(--green);border-color:var(--green);box-shadow:0 4px 16px rgba(45,106,79,.35)}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px}
+.hamburger span{display:block;width:22px;height:2px;border-radius:2px;background:#fff;transition:var(--t)}
+nav.scrolled .hamburger span{background:var(--text)}
+@media(max-width:768px){.nav-links{display:none}.hamburger{display:flex}}
+
+/* mobile menu */
+.mobile-menu{
+  display:none;position:fixed;top:68px;left:0;right:0;z-index:999;
+  background:rgba(255,255,255,.98);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);box-shadow:var(--shadow-lg);
+  padding:20px 24px 28px;flex-direction:column;gap:4px;
+}
+.mobile-menu.open{display:flex}
+.mobile-menu a{font-size:1rem;font-weight:600;color:var(--text);text-decoration:none;padding:10px 0;border-bottom:1px solid var(--border)}
+.mobile-menu a:last-child{border:none}
+
+/* ── HERO ─────────────────────────────────────────── */
+#hero{
+  background:linear-gradient(150deg,var(--green-xdark) 0%,#122d1e 35%,var(--green-dark) 70%,#2d5a3f 100%);
+  padding:140px 0 100px;overflow:hidden;position:relative;color:#fff;
+}
+#hero::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 70% 80% at 65% 40%,rgba(82,183,136,.12) 0%,transparent 70%);
+}
+#hero::after{
+  content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none;opacity:.4;
+}
+.hero-inner{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center;position:relative;z-index:1}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  color:var(--accent);font-size:.8rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  margin-bottom:12px;
+}
+.germany-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);
+  border-radius:50px;padding:5px 14px;font-size:.78rem;font-weight:600;color:rgba(255,255,255,.9);
+  margin-bottom:20px;backdrop-filter:blur(8px);
+}
+.hero-title{
+  font-size:clamp(2.6rem,5.5vw,4.5rem);font-weight:900;line-height:1.05;
+  letter-spacing:-.05em;color:#fff;
+}
+.hero-title em{font-style:normal;background:linear-gradient(135deg,var(--accent),#95d5b2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-desc{font-size:1.15rem;color:rgba(255,255,255,.7);margin:22px 0 36px;line-height:1.7;max-width:480px}
+.hero-actions{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.hero-price{font-size:2.2rem;font-weight:900;color:#fff;display:flex;align-items:baseline;gap:4px}
+.hero-price sup{font-size:1.1rem;font-weight:700}
+.hero-price small{font-size:.82rem;color:rgba(255,255,255,.55);font-weight:400;margin-left:6px}
+.hero-trust{display:flex;gap:20px;margin-top:28px;flex-wrap:wrap}
+.hero-trust-item{display:flex;align-items:center;gap:7px;font-size:.82rem;color:rgba(255,255,255,.65);font-weight:500}
+.hero-trust-item svg{color:var(--accent);flex-shrink:0}
+
+/* ── FRIDGE ILLUSTRATION ─────────────────────────── */
+.hero-visual{position:relative;display:flex;justify-content:center;align-items:center}
+.fridge-wrap{position:relative;width:100%;max-width:380px}
+.fridge-chassis{
+  background:linear-gradient(160deg,#f0f8f3 0%,#e0f0e8 40%,#d0e8dc 100%);
+  border-radius:28px;padding:16px;
+  box-shadow:0 0 0 1px rgba(255,255,255,.15),0 4px 8px rgba(0,0,0,.15),0 24px 48px rgba(0,0,0,.35),0 48px 96px rgba(0,0,0,.2);
+  position:relative;overflow:hidden;
+}
+.fridge-chassis::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:60%;
+  background:linear-gradient(180deg,rgba(255,255,255,.25),transparent);
+  border-radius:28px 28px 0 0;pointer-events:none;z-index:2;
+}
+.fridge-top-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;margin-bottom:10px;
+  background:rgba(255,255,255,.6);border-radius:16px;backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.5);
+}
+.fridge-brand{font-size:.65rem;font-weight:900;letter-spacing:.12em;color:var(--green-dark)}
+.fridge-status{display:flex;align-items:center;gap:6px;font-size:.6rem;color:var(--green);font-weight:700}
+.fridge-status-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse-dot 2s ease-in-out infinite}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+.fridge-zones-stack{display:flex;flex-direction:column;gap:8px;position:relative;z-index:1}
+.fz{
+  border-radius:14px;padding:14px 16px;
+  display:flex;align-items:center;gap:12px;
+  border:1.5px solid transparent;
+  transition:transform .4s,box-shadow .4s,border-color .4s;
+  cursor:default;position:relative;overflow:hidden;
+}
+.fz::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.35),transparent);border-radius:14px;pointer-events:none}
+.fz.kalt{background:linear-gradient(135deg,#dbeeff,#c8e6ff);animation:zone-cycle 8s 0s infinite}
+.fz.frisch{background:linear-gradient(135deg,#d8f5e0,#c4eece);animation:zone-cycle 8s 2s infinite}
+.fz.trocken{background:linear-gradient(135deg,#fff3d4,#fde8b0);animation:zone-cycle 8s 4s infinite}
+.fz.feuchtig{background:linear-gradient(135deg,#f0e2ff,#e4cefc);animation:zone-cycle 8s 6s infinite}
+@keyframes zone-cycle{
+  0%,18%,100%{transform:translateX(0);box-shadow:none;border-color:transparent}
+  9%{transform:translateX(3px);border-color:rgba(255,255,255,.7);box-shadow:0 4px 20px rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.6)}
+}
+.fz-emoji{font-size:1.5rem;line-height:1;flex-shrink:0}
+.fz-info{flex:1}
+.fz-name{display:block;font-size:.78rem;font-weight:800;color:var(--text);letter-spacing:-.01em}
+.fz-temp{display:block;font-size:.65rem;font-weight:600;opacity:.6;margin-top:1px}
+.fz-led{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.fz.kalt .fz-led{background:#2196f3;box-shadow:0 0 6px #2196f3}
+.fz.frisch .fz-led{background:#4caf50;box-shadow:0 0 6px #4caf50}
+.fz.trocken .fz-led{background:#ff9800;box-shadow:0 0 6px #ff9800}
+.fz.feuchtig .fz-led{background:#9c27b0;box-shadow:0 0 6px #9c27b0}
+.fridge-handle{
+  position:absolute;right:-6px;top:20%;bottom:20%;
+  width:12px;border-radius:6px;
+  background:linear-gradient(180deg,#d0d8d4,#a8b4ae,#c8d4ce);
+  box-shadow:2px 0 8px rgba(0,0,0,.2);
+}
+.fridge-shadow{
+  position:absolute;bottom:-24px;left:10%;right:10%;
+  height:40px;border-radius:50%;
+  background:radial-gradient(ellipse,rgba(0,0,0,.35),transparent 70%);
+  filter:blur(8px);z-index:0;
+}
+
+/* floating badges */
+.float-badge{
+  position:absolute;background:rgba(255,255,255,.95);border-radius:16px;
+  padding:12px 18px;box-shadow:0 8px 32px rgba(0,0,0,.18),0 0 0 1px rgba(255,255,255,.5);
+  backdrop-filter:blur(12px);z-index:10;
+}
+.fb-1{top:-16px;right:-24px;animation:float-a 4s ease-in-out infinite}
+.fb-2{bottom:20px;left:-32px;animation:float-b 4s 2s ease-in-out infinite}
+.fb-3{top:45%;right:-28px;animation:float-a 4s 1s ease-in-out infinite}
+@keyframes float-a{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-10px) rotate(1deg)}}
+@keyframes float-b{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-8px) rotate(-1deg)}}
+.fb-stat{display:flex;align-items:center;gap:10px}
+.fb-num{font-size:1.4rem;font-weight:900;color:var(--green-dark);line-height:1}
+.fb-label{font-size:.65rem;font-weight:600;color:var(--muted);max-width:72px;line-height:1.3}
+.fb-stars{font-size:.75rem;color:#f59e0b;letter-spacing:1px;font-weight:700}
+.fb-text{font-size:.7rem;font-weight:700;color:var(--green-dark)}
+.fb-flag{font-size:.75rem;font-weight:700;color:var(--green-dark);display:flex;align-items:center;gap:4px}
+
+@media(max-width:960px){
+  #hero{padding:120px 0 80px}
+  .hero-inner{grid-template-columns:1fr;gap:56px}
+  .hero-visual{order:-1;max-width:340px;margin:0 auto}
+}
+@media(max-width:480px){
+  .fb-1{right:-8px}.fb-2{left:-8px}.fb-3{display:none}
+}
+
+/* ── TRUST BAR ────────────────────────────────────── */
+.trust-bar{
+  background:var(--off-white);border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  padding:20px 0;
+}
+.trust-bar-inner{
+  display:flex;justify-content:center;align-items:center;
+  gap:0;flex-wrap:wrap;max-width:900px;margin:0 auto;padding:0 24px;
+}
+.trust-item{
+  display:flex;align-items:center;gap:10px;padding:8px 28px;
+  font-size:.875rem;font-weight:600;color:var(--green-dark);
+  border-right:1px solid var(--border);
+}
+.trust-item:last-child{border-right:none}
+.trust-item span:first-child{font-size:1.1rem}
+@media(max-width:640px){
+  .trust-item{border-right:none;padding:8px 16px;font-size:.8rem}
+}
+
+/* ── PROOF BAR ────────────────────────────────────── */
+.proof-bar{background:var(--green-dark);padding:18px 0}
+.proof-bar-inner{display:flex;justify-content:center;gap:48px;flex-wrap:wrap;padding:0 24px}
+.proof-item{display:flex;align-items:center;gap:8px;font-size:.85rem;font-weight:500;color:rgba(255,255,255,.75)}
+.proof-item strong{color:#fff;font-size:1rem}
+
+/* ── ZONES ────────────────────────────────────────── */
+#zones{background:var(--off-white)}
+.zones-header{text-align:center;margin-bottom:72px}
+.zones-header .section-sub{margin:14px auto 0}
+.zones-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(248px,1fr));gap:24px}
+.zone-card{
+  background:#fff;border-radius:var(--radius);padding:36px 28px 32px;
+  border:1px solid var(--border);
+  transition:transform .15s,box-shadow .15s;
+  position:relative;overflow:hidden;cursor:default;
+  transform-style:preserve-3d;
+}
+.zone-card::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;border-radius:var(--radius) var(--radius) 0 0}
+.zone-card.kalt::before{background:linear-gradient(90deg,#64b5f6,#1565c0)}
+.zone-card.frisch::before{background:linear-gradient(90deg,#81c784,#2e7d32)}
+.zone-card.trocken::before{background:linear-gradient(90deg,#ffb74d,#e65100)}
+.zone-card.feuchtig::before{background:linear-gradient(90deg,#ce93d8,#6a1b9a)}
+.zone-card-glow{
+  position:absolute;inset:0;border-radius:var(--radius);
+  opacity:0;transition:opacity .3s;pointer-events:none;
+}
+.kalt .zone-card-glow{box-shadow:inset 0 0 40px rgba(33,150,243,.1),0 0 40px rgba(33,150,243,.25)}
+.frisch .zone-card-glow{box-shadow:inset 0 0 40px rgba(76,175,80,.1),0 0 40px rgba(76,175,80,.25)}
+.trocken .zone-card-glow{box-shadow:inset 0 0 40px rgba(255,152,0,.1),0 0 40px rgba(255,152,0,.25)}
+.feuchtig .zone-card-glow{box-shadow:inset 0 0 40px rgba(156,39,176,.1),0 0 40px rgba(156,39,176,.25)}
+.zone-card:hover .zone-card-glow{opacity:1}
+.zone-icon{
+  width:68px;height:68px;border-radius:18px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:2rem;margin-bottom:22px;
+  transition:transform var(--t);
+}
+.zone-card:hover .zone-icon{transform:scale(1.1) rotate(-4deg)}
+.kalt .zone-icon{background:linear-gradient(135deg,#e3f2fd,#bbdefb)}
+.frisch .zone-icon{background:linear-gradient(135deg,#e8f5e9,#c8e6c9)}
+.trocken .zone-icon{background:linear-gradient(135deg,#fff8e1,#ffecb3)}
+.feuchtig .zone-icon{background:linear-gradient(135deg,#f3e5f5,#e1bee7)}
+.zone-card h3{font-size:1.25rem;font-weight:800;margin-bottom:10px;letter-spacing:-.02em}
+.zone-card p{font-size:.9rem;color:var(--muted);line-height:1.65}
+.zone-temp{
+  margin-top:18px;display:inline-flex;align-items:center;gap:6px;
+  font-size:.78rem;font-weight:700;padding:5px 14px;border-radius:50px;
+}
+.kalt .zone-temp{background:#e3f2fd;color:#1565c0}
+.frisch .zone-temp{background:#e8f5e9;color:#2e7d32}
+.trocken .zone-temp{background:#fff8e1;color:#e65100}
+.feuchtig .zone-temp{background:#f3e5f5;color:#6a1b9a}
+
+/* ── APP ──────────────────────────────────────────── */
+#app{background:#fff}
+.app-inner{display:grid;grid-template-columns:1fr 1fr;gap:88px;align-items:center}
+.app-phone{position:relative;display:flex;justify-content:center}
+.phone-scene{position:relative;display:inline-block}
+.phone-glow{
+  position:absolute;inset:-30px;border-radius:60px;
+  background:radial-gradient(ellipse,rgba(45,106,79,.2),transparent 70%);
+  filter:blur(20px);z-index:0;
+}
+.phone-frame{
+  width:270px;height:540px;position:relative;z-index:1;
+  background:linear-gradient(160deg,#1a1a2e,#0f0f1a);
+  border-radius:44px;padding:12px;
+  box-shadow:0 0 0 1px rgba(255,255,255,.08),0 4px 8px rgba(0,0,0,.3),0 32px 64px rgba(0,0,0,.4);
+}
+.phone-notch{
+  position:absolute;top:12px;left:50%;transform:translateX(-50%);
+  width:88px;height:22px;background:#1a1a2e;border-radius:0 0 14px 14px;z-index:10;
+}
+.phone-screen{
+  background:#f0faf4;border-radius:34px;height:100%;
+  overflow:hidden;display:flex;flex-direction:column;
+}
+.phone-header{background:var(--green);padding:28px 16px 14px;color:#fff;font-size:.8rem;font-weight:700}
+.phone-status{font-size:.6rem;opacity:.7;margin-bottom:4px}
+.phone-content{padding:10px;flex:1;display:flex;flex-direction:column;gap:7px;overflow:hidden}
+.phone-card{
+  background:#fff;border-radius:12px;padding:10px 12px;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);display:flex;align-items:center;gap:10px;
+}
+.phone-card-icon{font-size:1.3rem;flex-shrink:0}
+.phone-card-text{font-size:.68rem}
+.phone-card-text strong{display:block;font-weight:700;color:var(--text)}
+.phone-card-text span{color:var(--muted)}
+.expiry-bar{height:3px;border-radius:2px;margin-top:5px}
+.expiry-ok{background:var(--accent);width:68%}
+.expiry-warn{background:#f59e0b;width:28%}
+.app-content .section-sub{max-width:460px}
+.app-features{list-style:none;margin-top:36px;display:flex;flex-direction:column;gap:18px}
+.app-feature{display:flex;gap:16px;align-items:flex-start}
+.feature-icon{
+  width:46px;height:46px;border-radius:14px;background:var(--green-bg);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.2rem;flex-shrink:0;transition:transform var(--t);
+}
+.app-feature:hover .feature-icon{transform:scale(1.12) rotate(-4deg)}
+.feature-text h4{font-size:.95rem;font-weight:700;margin-bottom:3px;letter-spacing:-.01em}
+.feature-text p{font-size:.85rem;color:var(--muted);line-height:1.55}
+.app-note{
+  margin-top:28px;display:inline-flex;align-items:center;gap:8px;
+  background:var(--green-bg);border-radius:50px;padding:10px 22px;
+  font-size:.85rem;font-weight:700;color:var(--green-dark);border:1.5px solid var(--green-mid);
+}
+@media(max-width:900px){.app-inner{grid-template-columns:1fr;gap:52px}.app-phone{order:-1}}
+
+/* ── HOW IT WORKS ─────────────────────────────────── */
+#how{background:var(--off-white)}
+.how-header{text-align:center;margin-bottom:72px}
+.how-header .section-sub{margin:14px auto 0}
+.steps{display:grid;grid-template-columns:1fr 48px 1fr 48px 1fr;align-items:start;gap:0}
+.step{text-align:center;padding:0 8px}
+.step-num{
+  width:80px;height:80px;border-radius:50%;
+  background:linear-gradient(135deg,var(--green-light),var(--green-dark));
+  color:#fff;display:flex;align-items:center;justify-content:center;
+  font-size:1.8rem;margin:0 auto 24px;
+  box-shadow:0 8px 24px rgba(45,106,79,.4),0 0 0 8px rgba(45,106,79,.1);
+  transition:transform var(--t),box-shadow var(--t);
+}
+.step:hover .step-num{transform:scale(1.08);box-shadow:0 12px 32px rgba(45,106,79,.5),0 0 0 12px rgba(45,106,79,.1)}
+.step h3{font-size:1.1rem;font-weight:800;margin-bottom:10px;letter-spacing:-.02em}
+.step p{font-size:.9rem;color:var(--muted);line-height:1.65}
+.step-connector{display:flex;align-items:flex-start;padding-top:30px;justify-content:center}
+.step-connector svg{color:var(--accent);opacity:.5;width:28px;height:28px}
+@media(max-width:700px){
+  .steps{grid-template-columns:1fr;gap:40px}
+  .step-connector{transform:rotate(90deg);padding:4px 0;margin:-8px auto}
+}
+
+/* ── COMPARISON ────────────────────────────────────── */
+#comparison{background:#fff}
+.comp-header{text-align:center;margin-bottom:64px}
+.comp-header .section-sub{margin:14px auto 0}
+.comp-table{
+  display:grid;grid-template-columns:1fr 64px 1fr;
+  gap:0;max-width:900px;margin:0 auto;
+  border-radius:var(--radius);overflow:hidden;
+  box-shadow:var(--shadow-lg);border:1px solid var(--border);
+}
+.comp-col{padding:0}
+.comp-col-header{
+  padding:28px 32px 24px;display:flex;align-items:center;gap:12px;
+}
+.comp-col-header h3{font-size:1.1rem;font-weight:800;letter-spacing:-.02em}
+.comp-col-header .hd-icon{font-size:1.5rem}
+.comp-bad .comp-col-header{background:#fef2f2;border-bottom:1px solid #fecaca}
+.comp-bad .comp-col-header h3{color:#991b1b}
+.comp-good .comp-col-header{background:linear-gradient(135deg,var(--green),var(--green-light));border-bottom:1px solid rgba(255,255,255,.2)}
+.comp-good .comp-col-header h3{color:#fff}
+.comp-good .comp-col-header .hd-icon{filter:brightness(10)}
+.comp-col ul{list-style:none}
+.comp-col li{
+  display:flex;align-items:center;gap:14px;padding:16px 32px;
+  font-size:.9rem;border-bottom:1px solid var(--border);
+}
+.comp-col li:last-child{border-bottom:none}
+.comp-bad li{color:var(--muted);background:#fff}
+.comp-bad li:nth-child(even){background:#fafafa}
+.comp-good li{color:var(--text);font-weight:500;background:#f8fdf9}
+.comp-good li:nth-child(even){background:#f0f9f3}
+.comp-x{
+  width:22px;height:22px;border-radius:50%;background:#fee2e2;
+  color:#dc2626;display:flex;align-items:center;justify-content:center;
+  font-size:.7rem;font-weight:900;flex-shrink:0;
+}
+.comp-check{
+  width:22px;height:22px;border-radius:50%;background:var(--green-bg);
+  color:var(--green);display:flex;align-items:center;justify-content:center;
+  font-size:.7rem;font-weight:900;flex-shrink:0;
+}
+.comp-vs-col{
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(180deg,#f9f9f9,#f0f0f0);
+  border-left:1px solid var(--border);border-right:1px solid var(--border);
+}
+.comp-vs{
+  width:40px;height:40px;border-radius:50%;
+  background:var(--text);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.72rem;font-weight:900;letter-spacing:.05em;
+}
+@media(max-width:680px){
+  .comp-table{grid-template-columns:1fr;border-radius:var(--radius)}
+  .comp-vs-col{display:none}
+  .comp-col-header{padding:20px 20px 16px}
+  .comp-col li{padding:14px 20px;font-size:.85rem}
+}
+
+/* ── PRICING ──────────────────────────────────────── */
+#pricing{
+  background:linear-gradient(160deg,var(--green-xdark) 0%,#122d1e 40%,var(--green-dark) 100%);
+  color:#fff;text-align:center;position:relative;overflow:hidden;
+}
+#pricing::before{
+  content:'';position:absolute;top:-200px;left:50%;transform:translateX(-50%);
+  width:600px;height:600px;border-radius:50%;
+  background:radial-gradient(circle,rgba(82,183,136,.15),transparent 70%);
+  pointer-events:none;
+}
+#pricing .section-title{color:#fff}
+#pricing .section-sub{color:rgba(255,255,255,.65);margin:14px auto 0}
+.pricing-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);
+  border-radius:50px;padding:6px 18px;font-size:.78rem;font-weight:700;
+  color:rgba(255,255,255,.9);letter-spacing:.04em;text-transform:uppercase;
+  margin-bottom:20px;backdrop-filter:blur(8px);
+}
+.pricing-card{
+  max-width:540px;margin:52px auto 0;
+  background:#fff;border-radius:28px;padding:52px 48px;
+  box-shadow:0 0 0 1px rgba(255,255,255,.1),0 32px 80px rgba(0,0,0,.35);
+  color:var(--text);position:relative;overflow:hidden;
+}
+.pricing-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--accent),var(--green),var(--green-light),var(--accent));
+  background-size:200%;animation:gradient-move 3s linear infinite;
+}
+@keyframes gradient-move{from{background-position:0%}to{background-position:200%}}
+.pricing-top-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:linear-gradient(135deg,var(--green),var(--green-light));
+  color:#fff;border-radius:50px;padding:8px 20px;
+  font-size:.78rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+  margin-bottom:28px;box-shadow:0 4px 16px rgba(45,106,79,.35);
+}
+.pricing-amount{
+  font-size:5rem;font-weight:900;color:var(--green-dark);
+  line-height:1;letter-spacing:-.05em;
+}
+.pricing-amount sup{font-size:2rem;vertical-align:super;font-weight:700}
+.pricing-period{font-size:.9rem;color:var(--muted);margin-top:6px}
+.pricing-divider{border:none;border-top:1px solid var(--border);margin:32px 0}
+.pricing-features{list-style:none;display:flex;flex-direction:column;gap:14px;text-align:left}
+.pricing-features li{display:flex;align-items:center;gap:14px;font-size:.95rem;font-weight:500}
+.check{
+  width:26px;height:26px;border-radius:50%;background:var(--green-bg);
+  color:var(--green);display:flex;align-items:center;justify-content:center;
+  font-size:.72rem;flex-shrink:0;font-weight:900;
+}
+.pricing-de-note{
+  display:inline-flex;align-items:center;gap:6px;margin-top:20px;
+  font-size:.8rem;font-weight:600;color:var(--muted);
+  background:var(--off-white);border-radius:50px;padding:6px 16px;border:1px solid var(--border);
+}
+.pricing-cta{margin-top:28px;width:100%;justify-content:center;font-size:1.1rem;padding:20px}
+.pricing-guarantee{
+  margin-top:14px;font-size:.82rem;color:var(--muted);
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+@media(max-width:560px){.pricing-card{padding:36px 24px}.pricing-amount{font-size:4rem}}
+
+/* ── TESTIMONIALS ─────────────────────────────────── */
+#testimonials{background:var(--off-white)}
+.testi-header{text-align:center;margin-bottom:60px}
+.testi-header .section-sub{margin:14px auto 0}
+.testi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px}
+.testi-card{
+  background:#fff;border-radius:var(--radius);padding:36px 32px;
+  border:1px solid var(--border);position:relative;
+  transition:transform var(--t),box-shadow var(--t);
+  box-shadow:var(--shadow-sm);
+}
+.testi-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg)}
+.testi-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.stars-row{display:flex;gap:2px}
+.star{width:16px;height:16px;color:#f59e0b;fill:#f59e0b}
+.verified-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  background:#f0fdf4;color:var(--green);border-radius:50px;
+  padding:4px 10px;font-size:.68rem;font-weight:700;
+  border:1px solid var(--green-mid);
+}
+.testi-text{font-size:.95rem;line-height:1.75;color:#374151;margin-bottom:24px}
+.testi-author{display:flex;align-items:center;gap:14px}
+.testi-avatar{
+  width:48px;height:48px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.95rem;font-weight:800;color:#fff;letter-spacing:-.02em;
+  box-shadow:0 2px 8px rgba(0,0,0,.15);
+}
+.av-sm{background:linear-gradient(135deg,#2d6a4f,#52b788)}
+.av-tr{background:linear-gradient(135deg,#1565c0,#42a5f5)}
+.av-kw{background:linear-gradient(135deg,#e65100,#ffb74d)}
+.testi-meta{display:flex;flex-direction:column}
+.testi-name{font-weight:700;font-size:.9rem;letter-spacing:-.01em}
+.testi-role{font-size:.78rem;color:var(--muted);margin-top:1px}
+.testi-date{font-size:.72rem;color:var(--muted);margin-top:4px}
+
+/* ── FAQ ──────────────────────────────────────────── */
+#faq{background:#fff}
+.faq-header{text-align:center;margin-bottom:60px}
+.faq-header .section-sub{margin:14px auto 0}
+.faq-list{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+.faq-item{
+  background:#fff;border-radius:var(--radius);border:1.5px solid var(--border);
+  overflow:hidden;transition:border-color var(--t),box-shadow var(--t);
+}
+.faq-item:hover{border-color:var(--green-mid);box-shadow:var(--shadow)}
+.faq-item.open{border-color:var(--green);box-shadow:var(--shadow)}
+.faq-q{
+  width:100%;display:flex;align-items:center;justify-content:space-between;
+  padding:22px 28px;font-size:.98rem;font-weight:700;cursor:pointer;
+  background:none;border:none;text-align:left;color:var(--text);gap:16px;transition:color var(--t);
+}
+.faq-q:hover{color:var(--green)}
+.faq-icon{
+  width:30px;height:30px;border-radius:50%;background:var(--green-bg);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1rem;flex-shrink:0;transition:transform var(--t),background var(--t);
+  color:var(--green);font-weight:900;line-height:1;
+}
+.faq-item.open .faq-icon{transform:rotate(45deg);background:var(--green);color:#fff}
+.faq-a{
+  padding:0 28px;max-height:0;overflow:hidden;
+  font-size:.9rem;color:var(--muted);line-height:1.75;
+  transition:max-height .4s ease,padding .4s ease;
+}
+.faq-item.open .faq-a{max-height:220px;padding:0 28px 24px}
+
+/* ── FOOTER ───────────────────────────────────────── */
+footer{background:var(--green-xdark);color:rgba(255,255,255,.65);padding:72px 0 36px}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;margin-bottom:52px}
+.footer-brand .logo{color:var(--accent);display:block;margin-bottom:14px;font-size:1.5rem}
+.footer-brand p{font-size:.85rem;line-height:1.65;max-width:240px}
+.footer-col h4{color:#fff;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:18px}
+.footer-col ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+.footer-col a{color:rgba(255,255,255,.55);font-size:.85rem;text-decoration:none;transition:color var(--t)}
+.footer-col a:hover{color:#fff}
+.footer-de{
+  display:inline-flex;align-items:center;gap:6px;margin-top:16px;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);
+  border-radius:50px;padding:6px 14px;font-size:.75rem;font-weight:600;color:rgba(255,255,255,.7);
+}
+.footer-bottom{
+  border-top:1px solid rgba(255,255,255,.1);padding-top:32px;
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:.8rem;flex-wrap:wrap;gap:12px;
+}
+.footer-bottom a{color:rgba(255,255,255,.45);text-decoration:none;transition:color var(--t)}
+.footer-bottom a:hover{color:#fff}
+@media(max-width:768px){.footer-grid{grid-template-columns:1fr 1fr}.footer-brand{grid-column:1/-1}}
+@media(max-width:480px){.footer-grid{grid-template-columns:1fr}}
+
+/* ── MODAL ────────────────────────────────────────── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(10,20,14,.7);
+  backdrop-filter:blur(8px);z-index:9999;
+  display:flex;align-items:center;justify-content:center;
+  padding:24px;opacity:0;pointer-events:none;transition:opacity .3s;
+}
+.modal-overlay.active{opacity:1;pointer-events:all}
+.modal{
+  background:#fff;border-radius:28px;padding:52px 44px;
+  max-width:460px;width:100%;text-align:center;
+  box-shadow:0 32px 96px rgba(0,0,0,.3);
+  transform:translateY(24px) scale(.96);transition:transform .4s cubic-bezier(.34,1.56,.64,1);
+}
+.modal-overlay.active .modal{transform:none}
+.modal-icon{font-size:4.5rem;margin-bottom:20px;display:block;animation:pop-in .5s .1s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes pop-in{from{transform:scale(0)}to{transform:scale(1)}}
+.modal h2{font-size:1.6rem;font-weight:900;margin-bottom:12px;color:var(--green-dark);letter-spacing:-.03em}
+.modal p{color:var(--muted);line-height:1.7;margin-bottom:32px}
+.modal-close{
+  background:var(--green);color:#fff;border:none;border-radius:50px;
+  padding:16px 40px;font-size:.95rem;font-weight:700;cursor:pointer;transition:background var(--t),transform var(--t);
+}
+.modal-close:hover{background:var(--green-light);transform:scale(1.02)}
+
+/* ── SCROLL ANIMATIONS ────────────────────────────── */
+.reveal{opacity:0;transform:translateY(40px);transition:opacity .7s ease,transform .7s ease}
+.reveal-left{opacity:0;transform:translateX(-40px);transition:opacity .7s ease,transform .7s ease}
+.reveal-right{opacity:0;transform:translateX(40px);transition:opacity .7s ease,transform .7s ease}
+.reveal-scale{opacity:0;transform:scale(.92);transition:opacity .7s ease,transform .7s ease}
+.reveal.visible,.reveal-left.visible,.reveal-right.visible,.reveal-scale.visible{opacity:1;transform:none}
+.reveal-delay-1{transition-delay:.1s}.reveal-delay-2{transition-delay:.2s}
+.reveal-delay-3{transition-delay:.3s}.reveal-delay-4{transition-delay:.4s}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="navbar">
+  <div class="nav-inner">
+    <a href="#" class="logo">Fresh<span>Vault</span></a>
+    <ul class="nav-links">
+      <li><a href="#zones">Zonen</a></li>
+      <li><a href="#app">App</a></li>
+      <li><a href="#how">So geht's</a></li>
+      <li><a href="#comparison">Vergleich</a></li>
+      <li><a href="#pricing">Preis</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+    <button class="btn btn-primary nav-cta buy-trigger">Jetzt kaufen – 322&nbsp;€</button>
+    <div class="hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobile-menu">
+  <a href="#zones" class="mm-link">Zonen</a>
+  <a href="#app" class="mm-link">App</a>
+  <a href="#how" class="mm-link">So geht's</a>
+  <a href="#comparison" class="mm-link">Vergleich</a>
+  <a href="#pricing" class="mm-link">Preis</a>
+  <a href="#faq" class="mm-link">FAQ</a>
+</div>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="container">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <div class="germany-pill">🇩🇪 Nur in Deutschland verfügbar</div>
+        <div class="hero-eyebrow">Smarte Kühlschrank-Organisation</div>
+        <h1 class="hero-title">
+          Dein Kühlschrank.<br>
+          <em>Endlich organisiert.</em>
+        </h1>
+        <p class="hero-desc">FreshVault kombiniert vier präzise Kühlzonen-Einsätze mit einer kostenlosen PWA-App – für weniger Lebensmittelverschwendung und mehr Frische.</p>
+        <div class="hero-actions">
+          <div class="hero-price">
+            <sup>€</sup>322
+            <small>einmalig, alles inklusive</small>
+          </div>
+          <button class="btn btn-primary buy-trigger" style="font-size:1.05rem;padding:18px 40px">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+            Jetzt kaufen
+          </button>
+        </div>
+        <div class="hero-trust">
+          <span class="hero-trust-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Kostenloser Versand
+          </span>
+          <span class="hero-trust-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            30 Tage Rückgabe
+          </span>
+          <span class="hero-trust-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            2 Jahre Garantie
+          </span>
+        </div>
+      </div>
+
+      <div class="hero-visual reveal-scale">
+        <div class="fridge-wrap">
+          <div class="fridge-shadow"></div>
+          <div class="fridge-chassis">
+            <div class="fridge-handle"></div>
+            <div class="fridge-top-bar">
+              <span class="fridge-brand">FRESHVAULT SYSTEM</span>
+              <span class="fridge-status"><span class="fridge-status-dot"></span>Aktiv</span>
+            </div>
+            <div class="fridge-zones-stack">
+              <div class="fz kalt">
+                <span class="fz-emoji">❄️</span>
+                <div class="fz-info">
+                  <span class="fz-name">Kaltzone</span>
+                  <span class="fz-temp">0 – 4 °C · Fleisch &amp; Fisch</span>
+                </div>
+                <span class="fz-led"></span>
+              </div>
+              <div class="fz frisch">
+                <span class="fz-emoji">🥬</span>
+                <div class="fz-info">
+                  <span class="fz-name">Frischzone</span>
+                  <span class="fz-temp">4 – 7 °C · Gemüse &amp; Kräuter</span>
+                </div>
+                <span class="fz-led"></span>
+              </div>
+              <div class="fz trocken">
+                <span class="fz-emoji">🧅</span>
+                <div class="fz-info">
+                  <span class="fz-name">Trockenzone</span>
+                  <span class="fz-temp">8 – 12 °C · Käse &amp; Aufschnitt</span>
+                </div>
+                <span class="fz-led"></span>
+              </div>
+              <div class="fz feuchtig">
+                <span class="fz-emoji">💧</span>
+                <div class="fz-info">
+                  <span class="fz-name">Feuchtigkeitszone</span>
+                  <span class="fz-temp">85 – 95 % RH · Obst &amp; Beeren</span>
+                </div>
+                <span class="fz-led"></span>
+              </div>
+            </div>
+          </div>
+          <div class="float-badge fb-1">
+            <div class="fb-stat">
+              <span class="fb-num">38%</span>
+              <span class="fb-label">weniger Lebensmittel­verschwendung</span>
+            </div>
+          </div>
+          <div class="float-badge fb-2">
+            <div>
+              <div class="fb-stars">★★★★★</div>
+              <div class="fb-text">4,9 / 5 Sterne</div>
+            </div>
+          </div>
+          <div class="float-badge fb-3">
+            <div class="fb-flag">✓ Passt in jeden Kühlschrank</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST BAR -->
+<div class="trust-bar">
+  <div class="trust-bar-inner">
+    <div class="trust-item"><span>🔒</span><span>Sicher bezahlen</span></div>
+    <div class="trust-item"><span>🚚</span><span>Kostenloser Versand</span></div>
+    <div class="trust-item"><span>↩️</span><span>30 Tage Rückgabe</span></div>
+    <div class="trust-item"><span>🛡️</span><span>2 Jahre Garantie</span></div>
+  </div>
+</div>
+
+<!-- PROOF BAR -->
+<div class="proof-bar">
+  <div class="proof-bar-inner">
+    <span class="proof-item"><strong>2.400+</strong> zufriedene Kunden</span>
+    <span class="proof-item"><strong>38%</strong> weniger Lebensmittelverschwendung</span>
+    <span class="proof-item"><strong>App Store</strong> 4,9 ★ Bewertung</span>
+    <span class="proof-item"><strong>100%</strong> Made in Germany</span>
+  </div>
+</div>
+
+<!-- ZONES -->
+<section id="zones">
+  <div class="container">
+    <div class="zones-header reveal">
+      <div class="badge">Die 4 Zonen</div>
+      <h2 class="section-title">Jedes Lebensmittel an seinem optimalen Platz</h2>
+      <p class="section-sub">Vier modulare Einsätze, die sich an jeden Kühlschrank anpassen – für maximale Frische und Übersicht.</p>
+    </div>
+    <div class="zones-grid">
+      <div class="zone-card kalt reveal reveal-delay-1">
+        <div class="zone-card-glow"></div>
+        <div class="zone-icon">❄️</div>
+        <h3>Kaltzone</h3>
+        <p>Ideal für Fleisch, Fisch und Meeresfrüchte. Der kälteste Bereich hält empfindliche Proteine länger frisch und sicher.</p>
+        <span class="zone-temp">🌡 0 – 4 °C</span>
+      </div>
+      <div class="zone-card frisch reveal reveal-delay-2">
+        <div class="zone-card-glow"></div>
+        <div class="zone-icon">🥬</div>
+        <h3>Frischzone</h3>
+        <p>Optimiert für Gemüse, Salate und Kräuter. Spezielle Belüftungsschlitze sorgen für ideale Luftzirkulation.</p>
+        <span class="zone-temp">🌡 4 – 7 °C</span>
+      </div>
+      <div class="zone-card trocken reveal reveal-delay-3">
+        <div class="zone-card-glow"></div>
+        <div class="zone-icon">🧅</div>
+        <h3>Trockenzone</h3>
+        <p>Für Käse, Aufschnitt und fermentierte Produkte. Niedrigere Luftfeuchtigkeit verhindert unerwünschte Schimmelbildung.</p>
+        <span class="zone-temp">🌡 8 – 12 °C</span>
+      </div>
+      <div class="zone-card feuchtig reveal reveal-delay-4">
+        <div class="zone-card-glow"></div>
+        <div class="zone-icon">💧</div>
+        <h3>Feuchtigkeitszone</h3>
+        <p>Bewahrt Obst und Beeren in optimaler Feuchtigkeit. Verhindert das Austrocknen und erhält Vitamine und Aromen.</p>
+        <span class="zone-temp">💧 85 – 95% RH</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- APP -->
+<section id="app">
+  <div class="container">
+    <div class="app-inner">
+      <div class="app-phone reveal-left">
+        <div class="phone-scene">
+          <div class="phone-glow"></div>
+          <div class="phone-frame">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="phone-header">
+                <div class="phone-status">9:41 · FreshVault App</div>
+                <div style="font-weight:800;font-size:.95rem;">Guten Morgen, Lena! 👋</div>
+              </div>
+              <div class="phone-content">
+                <div class="phone-card">
+                  <div class="phone-card-icon">⚠️</div>
+                  <div class="phone-card-text">
+                    <strong>Joghurt läuft ab</strong>
+                    <span>Morgen · Frischzone</span>
+                    <div class="expiry-bar expiry-warn"></div>
+                  </div>
+                </div>
+                <div class="phone-card">
+                  <div class="phone-card-icon">✅</div>
+                  <div class="phone-card-text">
+                    <strong>Äpfel – 5 Tage</strong>
+                    <span>Feuchtigkeitszone</span>
+                    <div class="expiry-bar expiry-ok"></div>
+                  </div>
+                </div>
+                <div class="phone-card">
+                  <div class="phone-card-icon">🍝</div>
+                  <div class="phone-card-text">
+                    <strong>Rezeptvorschlag</strong>
+                    <span>Pasta Arrabiata</span>
+                  </div>
+                </div>
+                <div class="phone-card">
+                  <div class="phone-card-icon">🛒</div>
+                  <div class="phone-card-text">
+                    <strong>Einkaufsliste</strong>
+                    <span>3 Artikel fehlen</span>
+                  </div>
+                </div>
+                <div class="phone-card">
+                  <div class="phone-card-icon">🏆</div>
+                  <div class="phone-card-text">
+                    <strong>Niveau 7 erreicht!</strong>
+                    <span>+120 FreshPoints</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="app-content reveal-right">
+        <div class="badge">Kostenlose App inklusive</div>
+        <h2 class="section-title">Die smarte App für deinen Kühlschrank</h2>
+        <p class="section-sub">Kein Abo, keine versteckten Kosten – die PWA läuft auf allen Geräten und ist im Kaufpreis enthalten.</p>
+        <ul class="app-features">
+          <li class="app-feature">
+            <div class="feature-icon">📅</div>
+            <div class="feature-text">
+              <h4>Ablaufdatum-Tracking</h4>
+              <p>Erhalte Erinnerungen bevor Lebensmittel verderben und spare Geld.</p>
+            </div>
+          </li>
+          <li class="app-feature">
+            <div class="feature-icon">🍽️</div>
+            <div class="feature-text">
+              <h4>Rezeptvorschläge</h4>
+              <p>Die App schlägt Rezepte basierend auf deinem aktuellen Kühlschrankinhalt vor.</p>
+            </div>
+          </li>
+          <li class="app-feature">
+            <div class="feature-icon">👨‍👩‍👧</div>
+            <div class="feature-text">
+              <h4>Family Sharing</h4>
+              <p>Teile den Kühlschrankinhalt mit bis zu 6 Haushaltsmitgliedern in Echtzeit.</p>
+            </div>
+          </li>
+          <li class="app-feature">
+            <div class="feature-icon">🛒</div>
+            <div class="feature-text">
+              <h4>Intelligente Einkaufsliste</h4>
+              <p>Automatische Vorschläge für fehlende Zutaten – direkt aus dem Kühlschrank.</p>
+            </div>
+          </li>
+          <li class="app-feature">
+            <div class="feature-icon">🎮</div>
+            <div class="feature-text">
+              <h4>Gamification &amp; Challenges</h4>
+              <p>Sammle FreshPoints für Null-Verschwendungs-Wochen und schalte Abzeichen frei.</p>
+            </div>
+          </li>
+        </ul>
+        <div class="app-note">📱 PWA – funktioniert auf iOS &amp; Android, keine Installation nötig</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="container">
+    <div class="how-header reveal">
+      <div class="badge">So einfach geht's</div>
+      <h2 class="section-title">In drei Schritten loslegen</h2>
+      <p class="section-sub">FreshVault ist in wenigen Minuten einsatzbereit – kein Werkzeug, keine Montage.</p>
+    </div>
+    <div class="steps">
+      <div class="step reveal reveal-delay-1">
+        <div class="step-num">📦</div>
+        <h3>Einsätze einlegen</h3>
+        <p>Lege die vier modularen FreshVault-Einsätze einfach in deinen bestehenden Kühlschrank ein – universell passend.</p>
+      </div>
+      <div class="step-connector reveal reveal-delay-1">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="step reveal reveal-delay-2">
+        <div class="step-num">📱</div>
+        <h3>App installieren</h3>
+        <p>Öffne freshvault.app in deinem Browser und füge die PWA zum Homescreen hinzu – fertig. Kein App Store nötig.</p>
+      </div>
+      <div class="step-connector reveal reveal-delay-2">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="step reveal reveal-delay-3">
+        <div class="step-num">🚀</div>
+        <h3>Loslegen</h3>
+        <p>Scanne deine Lebensmittel, weise sie den Zonen zu und genieße einen strukturierten, smarten Kühlschrank.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARISON -->
+<section id="comparison">
+  <div class="container">
+    <div class="comp-header reveal">
+      <div class="badge">Der Unterschied</div>
+      <h2 class="section-title">Leben mit &amp; ohne FreshVault</h2>
+      <p class="section-sub">Der Alltag im direkten Vergleich – was wirklich der Unterschied ist.</p>
+    </div>
+    <div class="comp-table reveal reveal-delay-1">
+      <div class="comp-col comp-bad">
+        <div class="comp-col-header">
+          <span class="hd-icon">😤</span>
+          <h3>Ohne FreshVault</h3>
+        </div>
+        <ul>
+          <li><span class="comp-x">✗</span> Chaos und Unübersichtlichkeit</li>
+          <li><span class="comp-x">✗</span> Lebensmittel verderben unbemerkt</li>
+          <li><span class="comp-x">✗</span> Kein Überblick über Ablaufdaten</li>
+          <li><span class="comp-x">✗</span> Keine Rezeptinspiration</li>
+          <li><span class="comp-x">✗</span> Einkaufslisten per Hand</li>
+          <li><span class="comp-x">✗</span> Jeder kauft, was er will</li>
+        </ul>
+      </div>
+      <div class="comp-vs-col"><div class="comp-vs">VS</div></div>
+      <div class="comp-col comp-good">
+        <div class="comp-col-header">
+          <span class="hd-icon">✨</span>
+          <h3>Mit FreshVault</h3>
+        </div>
+        <ul>
+          <li><span class="comp-check">✓</span> Perfekte Ordnung in 4 Zonen</li>
+          <li><span class="comp-check">✓</span> Bis zu 38% weniger Verschwendung</li>
+          <li><span class="comp-check">✓</span> Ablauf-Erinnerungen per App</li>
+          <li><span class="comp-check">✓</span> Smarte Rezeptvorschläge</li>
+          <li><span class="comp-check">✓</span> Automatische, geteilte Einkaufsliste</li>
+          <li><span class="comp-check">✓</span> Family Sharing für 6 Personen</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="container">
+    <div class="reveal">
+      <div class="pricing-eyebrow">✦ Einmaliger Kauf · Keine Abos · Keine Überraschungen ✦</div>
+      <h2 class="section-title">Ein Preis. Alles drin.</h2>
+      <p class="section-sub">Keine Abos. Keine versteckten Kosten. Einmal kaufen, dauerhaft profitieren.</p>
+    </div>
+    <div class="pricing-card reveal reveal-delay-1">
+      <div class="pricing-top-badge">🏆 FreshVault Complete</div>
+      <div class="pricing-amount"><sup>€</sup>322</div>
+      <div class="pricing-period">einmalige Zahlung · kein Abo · für immer</div>
+      <hr class="pricing-divider">
+      <ul class="pricing-features">
+        <li><span class="check">✓</span> 4 modulare Kühlzonen-Einsätze (Kalt, Frisch, Trocken, Feuchtigkeit)</li>
+        <li><span class="check">✓</span> Kostenlose PWA-App (iOS &amp; Android)</li>
+        <li><span class="check">✓</span> Unbegrenzte Lebensmitteleinträge &amp; Tracking</li>
+        <li><span class="check">✓</span> Family Sharing für bis zu 6 Personen</li>
+        <li><span class="check">✓</span> Rezeptvorschläge &amp; Einkaufsliste</li>
+        <li><span class="check">✓</span> Gamification &amp; Challenges</li>
+        <li><span class="check">✓</span> Kostenloser Versand &amp; 30 Tage Rückgabe</li>
+        <li><span class="check">✓</span> 2 Jahre Herstellergarantie</li>
+      </ul>
+      <div class="pricing-de-note">🇩🇪 Nur in Deutschland verfügbar</div>
+      <button class="btn btn-primary pricing-cta buy-trigger">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        Jetzt kaufen für 322 €
+      </button>
+      <p class="pricing-guarantee">🔒 Sichere Zahlung · 30 Tage Geld-zurück-Garantie</p>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="container">
+    <div class="testi-header reveal">
+      <div class="badge">Was Kunden sagen</div>
+      <h2 class="section-title">Mehr als 2.400 begeisterte Haushalte</h2>
+      <p class="section-sub">Echte Erfahrungen von Menschen, die FreshVault täglich nutzen.</p>
+    </div>
+    <div class="testi-grid">
+      <div class="testi-card reveal reveal-delay-1">
+        <div class="testi-top">
+          <div class="stars-row">
+            <svg class="star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg class="star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg class="star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg class="star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg class="star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </div>
+          <span class="verified-badge">✓ Verifizierter Kauf</span>
+        </div>
+        <p class="testi-text">Seit wir FreshVault haben, schmeißen wir kaum noch etwas weg. Die App erinnert mich rechtzeitig und die Rezeptvorschläge sind wirklich gut. Für uns als Familie mit drei Kindern ein echter Gamechanger!</p>
+        <div class="testi-author">
+          <div class="testi-avatar av-sm">S.M.</div>
+          <div class="testi-meta">
+            <span class="testi-name">Sandra M.</span>
+            <span class="testi-role">Mutter von 3 Kindern, München</span>
+            <span class="testi-date">März 2026</span>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card reveal reveal-delay-2">
+        <div class="testi-top">
+          <div class="stars-row">
+            <svg class="star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg class="star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg class="star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg class="star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg class="star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </div>
+          <span class="verified-badge">✓ Verifizierter Kauf</span>
+        </div>
+        <p class="testi-text">Als Meal-Prep-Fan bin ich begeistert. Endlich weiß ich immer, was im Kühlschrank ist. Die Kaltzone für Fleisch und die Frischzone für Gemüse sind perfekt durchdacht. Top Qualität für den Preis.</p>
+        <div class="testi-author">
+          <div class="testi-avatar av-tr">T.R.</div>
+          <div class="testi-meta">
+            <span class="testi-name">Tobias R.</span>
+            <span class="testi-role">Fitness-Enthusiast, Hamburg</span>
+            <span class="testi-date">Februar 2026</span>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card reveal reveal-delay-3">
+        <div class="testi-top">
+          <div class="stars-row">
+            <svg class="star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg class="star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg class="star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg class="star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg class="star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </div>
+          <span class="verified-badge">✓ Verifizierter Kauf</span>
+        </div>
+        <p class="testi-text">Die PWA funktioniert reibungslos auf meinem iPhone. Besonders der Family Sharing-Feature ist super – mein Mann und ich sind immer synchronisiert. Hätte ich früher kaufen sollen!</p>
+        <div class="testi-author">
+          <div class="testi-avatar av-kw">K.W.</div>
+          <div class="testi-meta">
+            <span class="testi-name">Katja W.</span>
+            <span class="testi-role">Berufstätige, Berlin</span>
+            <span class="testi-date">April 2026</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="container">
+    <div class="faq-header reveal">
+      <div class="badge">Häufige Fragen</div>
+      <h2 class="section-title">Alle Antworten auf einen Blick</h2>
+      <p class="section-sub">Hast du noch Fragen? Meld dich jederzeit bei uns.</p>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-q">Passt FreshVault in jeden Kühlschrank?<span class="faq-icon">+</span></button>
+        <div class="faq-a">Ja! Die vier Einsätze sind modular aufgebaut und passen in alle Standard-Kühlschränke ab 50 cm Breite. Sie lassen sich flexibel zuschneiden und kombinieren, um sich an unterschiedliche Fachgrößen anzupassen.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Benötige ich ein Abo für die App?<span class="faq-icon">+</span></button>
+        <div class="faq-a">Nein, absolut nicht. Die App ist vollständig kostenlos und für immer – kein Abo, keine In-App-Käufe. Alle Features inklusive Family Sharing, Rezeptvorschläge und Gamification sind im einmaligen Kaufpreis enthalten.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Wie installiere ich die PWA-App?<span class="faq-icon">+</span></button>
+        <div class="faq-a">Einfach freshvault.app in deinem Smartphone-Browser öffnen und „Zum Homescreen hinzufügen" tippen. Das funktioniert auf iOS (Safari) und Android (Chrome) ohne App Store. Die App aktualisiert sich automatisch.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Was passiert, wenn ich nicht zufrieden bin?<span class="faq-icon">+</span></button>
+        <div class="faq-a">Du hast 30 Tage Zeit, FreshVault zu testen. Wenn du aus irgendeinem Grund nicht zufrieden bist, schickst du die Einsätze zurück und erhältst den vollen Kaufpreis erstattet – ohne Wenn und Aber. Der Rückversand ist kostenlos.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="#" class="logo">Fresh<span>Vault</span></a>
+        <p>Smarte Kühlschrank-Organisation für moderne Haushalte. Weniger Verschwendung, mehr Frische.</p>
+        <div class="footer-de">🇩🇪 Nur in Deutschland lieferbar</div>
+      </div>
+      <div class="footer-col">
+        <h4>Produkt</h4>
+        <ul>
+          <li><a href="#zones">Die 4 Zonen</a></li>
+          <li><a href="#app">App-Features</a></li>
+          <li><a href="#how">So funktioniert's</a></li>
+          <li><a href="#pricing">Preis &amp; Kauf</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Support</h4>
+        <ul>
+          <li><a href="#faq">FAQ</a></li>
+          <li><a href="#">Installationsguide</a></li>
+          <li><a href="#">Kontakt</a></li>
+          <li><a href="#">Garantie</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Rechtliches</h4>
+        <ul>
+          <li><a href="#">Impressum</a></li>
+          <li><a href="#">Datenschutz</a></li>
+          <li><a href="#">AGB</a></li>
+          <li><a href="#">Widerrufsrecht</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 FreshVault GmbH · Alle Rechte vorbehalten</span>
+      <span>Made with 💚 in Germany · <a href="#">hello@freshvault.app</a></span>
+    </div>
+  </div>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <span class="modal-icon">🎉</span>
+    <h2>Vielen Dank für deine Bestellung!</h2>
+    <p>Wir melden uns per E-Mail mit allen Details zu deiner Bestellung.<br>Dein FreshVault-System ist in 3–5 Werktagen bei dir.</p>
+    <button class="modal-close" id="modal-close">Schließen</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ── Nav scroll effect
+  const nav = document.getElementById('navbar');
+  const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 60);
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  // ── Mobile menu
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobile-menu');
+  hamburger.addEventListener('click', () => mobileMenu.classList.toggle('open'));
+  document.querySelectorAll('.mm-link').forEach(a => a.addEventListener('click', () => mobileMenu.classList.remove('open')));
+
+  // ── FAQ accordion
+  document.querySelectorAll('.faq-q').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.faq-item');
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!isOpen) item.classList.add('open');
+    });
+  });
+
+  // ── Modal
+  const modal = document.getElementById('modal');
+  document.querySelectorAll('.buy-trigger').forEach(btn => {
+    btn.addEventListener('click', () => modal.classList.add('active'));
+  });
+  document.getElementById('modal-close').addEventListener('click', () => modal.classList.remove('active'));
+  modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('active'); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') modal.classList.remove('active'); });
+
+  // ── Scroll reveal (all four types)
+  const revealClasses = ['.reveal','.reveal-left','.reveal-right','.reveal-scale'];
+  const allReveal = document.querySelectorAll(revealClasses.join(','));
+  const revealObs = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        revealObs.unobserve(entry.target);
+      }
+    });
+  }, {threshold: 0.1, rootMargin: '0px 0px -40px 0px'});
+  allReveal.forEach(el => revealObs.observe(el));
+
+  // ── Button ripple
+  document.querySelectorAll('.btn-primary').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      const rect = this.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height) * 1.5;
+      const ripple = document.createElement('span');
+      ripple.className = 'ripple';
+      ripple.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX - rect.left - size/2}px;top:${e.clientY - rect.top - size/2}px;`;
+      this.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 700);
+    });
+  });
+
+  // ── Zone card 3-D tilt
+  const isMouse = window.matchMedia('(hover:hover)').matches;
+  if (isMouse) {
+    document.querySelectorAll('.zone-card').forEach(card => {
+      card.addEventListener('mousemove', e => {
+        const r = card.getBoundingClientRect();
+        const x = (e.clientX - r.left - r.width  / 2) / r.width;
+        const y = (e.clientY - r.top  - r.height / 2) / r.height;
+        card.style.transform = `perspective(700px) rotateY(${x * 9}deg) rotateX(${-y * 9}deg) translateY(-6px)`;
+        card.style.transition = 'transform .08s ease';
+      });
+      card.addEventListener('mouseleave', () => {
+        card.style.transition = 'transform .4s ease, box-shadow .4s ease';
+        card.style.transform = '';
+      });
+    });
+  }
+})();
+</script>
+</body>
+</html>
