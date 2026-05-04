@@ -676,6 +676,87 @@ footer{background:var(--green-xdark);color:rgba(255,255,255,.65);padding:72px 0 
   .wheel-pointer-wrap{width:240px;height:240px}
 }
 
+/* ── RUECKNAHME FORM ──────────────────────────────── */
+#ruecknahme{background:var(--off-white)}
+.rueck-inner{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start}
+.rueck-badge{background:var(--green-bg);color:var(--green-dark)}
+.rueck-highlight{
+  background:linear-gradient(135deg,var(--green-bg),#c8e6c9);
+  border-radius:var(--radius);padding:28px 24px;margin-top:28px;
+  border:1px solid var(--green-mid);display:flex;gap:16px;align-items:flex-start;
+}
+.rueck-highlight-icon{font-size:2rem;flex-shrink:0}
+.rueck-highlight h4{font-weight:800;font-size:1rem;margin-bottom:4px;color:var(--green-dark)}
+.rueck-highlight p{font-size:.88rem;color:var(--muted);line-height:1.6}
+.form-card{background:#fff;border-radius:var(--radius);padding:36px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.form-group{margin-bottom:18px}
+.form-label{display:block;font-size:.82rem;font-weight:700;color:var(--text);margin-bottom:6px;letter-spacing:.01em}
+.form-control{
+  width:100%;padding:12px 16px;border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  font-size:.92rem;font-family:inherit;color:var(--text);background:#fff;
+  transition:border-color var(--t),box-shadow var(--t);outline:none;
+}
+.form-control:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(45,106,79,.12)}
+.form-control.error{border-color:#dc2626;box-shadow:0 0 0 3px rgba(220,38,38,.1)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+textarea.form-control{resize:vertical;min-height:100px}
+.form-submit{width:100%;padding:16px;font-size:1rem;margin-top:8px}
+.form-success{
+  display:none;text-align:center;padding:40px 24px;
+}
+.form-success-icon{font-size:3.5rem;margin-bottom:16px;display:block}
+.form-success h3{font-size:1.3rem;font-weight:900;color:var(--green-dark);margin-bottom:8px}
+.form-success p{font-size:.9rem;color:var(--muted);line-height:1.6}
+@media(max-width:900px){.rueck-inner{grid-template-columns:1fr;gap:40px}}
+@media(max-width:480px){.form-row{grid-template-columns:1fr}}
+
+/* ── FROSTBOX ─────────────────────────────────────── */
+#frostbox{
+  background:linear-gradient(135deg,#0d2117 0%,#1b3a2d 50%,#0d2117 100%);
+  position:relative;overflow:hidden;
+}
+#frostbox::before{
+  content:'';position:absolute;top:-100px;right:-100px;
+  width:500px;height:500px;border-radius:50%;
+  background:radial-gradient(circle,rgba(82,183,136,.08),transparent 70%);pointer-events:none;
+}
+.fb-banner{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;position:relative;z-index:1}
+.fb-logos{display:flex;align-items:center;gap:16px;margin-bottom:28px}
+.fb-logo-fv{font-size:1.4rem;font-weight:900;color:var(--accent);letter-spacing:-.03em}
+.fb-logo-sep{font-size:1.5rem;color:rgba(255,255,255,.3)}
+.fb-logo-fb{font-size:1.4rem;font-weight:900;color:#60a5fa;letter-spacing:-.03em}
+.fb-title{font-size:clamp(1.8rem,3.5vw,2.6rem);font-weight:900;line-height:1.15;letter-spacing:-.04em;color:#fff;margin-bottom:16px}
+.fb-title em{font-style:normal;color:var(--accent)}
+.fb-desc{font-size:1rem;color:rgba(255,255,255,.65);line-height:1.7;margin-bottom:28px;max-width:440px}
+.fb-benefits{list-style:none;display:flex;flex-direction:column;gap:12px;margin-bottom:36px}
+.fb-benefit{display:flex;align-items:flex-start;gap:12px;font-size:.9rem;color:rgba(255,255,255,.8)}
+.fb-benefit-icon{
+  width:28px;height:28px;border-radius:8px;background:rgba(82,183,136,.2);
+  color:var(--accent);display:flex;align-items:center;justify-content:center;
+  font-size:.9rem;flex-shrink:0;
+}
+.fb-actions{display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+.btn-fb{background:#2563eb;color:#fff;box-shadow:0 6px 24px rgba(37,99,235,.35)}
+.btn-fb:hover{background:#1d4ed8}
+.btn-fb-out{background:transparent;color:rgba(255,255,255,.7);border:1.5px solid rgba(255,255,255,.25);padding:16px 28px}
+.btn-fb-out:hover{background:rgba(255,255,255,.08);color:#fff;box-shadow:none}
+.fb-visual{display:flex;flex-direction:column;gap:16px}
+.fb-card{
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
+  border-radius:var(--radius);padding:20px 24px;backdrop-filter:blur(8px);
+  display:flex;align-items:center;gap:16px;
+  transition:background var(--t),transform var(--t);
+}
+.fb-card:hover{background:rgba(255,255,255,.12);transform:translateX(4px)}
+.fb-card-icon{font-size:1.8rem;flex-shrink:0}
+.fb-card-text strong{display:block;font-size:.9rem;font-weight:700;color:#fff;margin-bottom:2px}
+.fb-card-text span{font-size:.8rem;color:rgba(255,255,255,.55)}
+.fb-partnership-note{
+  margin-top:20px;font-size:.75rem;color:rgba(255,255,255,.35);
+  display:flex;align-items:center;gap:6px;
+}
+@media(max-width:900px){.fb-banner{grid-template-columns:1fr;gap:40px}}
+
 /* ── SCROLL ANIMATIONS ────────────────────────────── */
 .reveal{opacity:0;transform:translateY(40px);transition:opacity .7s ease,transform .7s ease}
 .reveal-left{opacity:0;transform:translateX(-40px);transition:opacity .7s ease,transform .7s ease}
@@ -696,10 +777,10 @@ footer{background:var(--green-xdark);color:rgba(255,255,255,.65);padding:72px 0 
       <li><a href="#zones">Zonen</a></li>
       <li><a href="#app">App</a></li>
       <li><a href="#how">So geht's</a></li>
-      <li><a href="#comparison">Vergleich</a></li>
       <li><a href="#wheel-section">🎰 Gewinnspiel</a></li>
+      <li><a href="#frostbox">🤝 FrostBox</a></li>
       <li><a href="#pricing">Preis</a></li>
-      <li><a href="#faq">FAQ</a></li>
+      <li><a href="#ruecknahme">♻️ Rücknahme</a></li>
     </ul>
     <button class="btn btn-primary nav-cta buy-trigger">Jetzt kaufen – 322&nbsp;€</button>
     <div class="hamburger" id="hamburger">
@@ -711,9 +792,10 @@ footer{background:var(--green-xdark);color:rgba(255,255,255,.65);padding:72px 0 
   <a href="#zones" class="mm-link">Zonen</a>
   <a href="#app" class="mm-link">App</a>
   <a href="#how" class="mm-link">So geht's</a>
-  <a href="#comparison" class="mm-link">Vergleich</a>
   <a href="#wheel-section" class="mm-link">🎰 Gewinnspiel</a>
+  <a href="#frostbox" class="mm-link">🤝 FrostBox Kooperation</a>
   <a href="#pricing" class="mm-link">Preis</a>
+  <a href="#ruecknahme" class="mm-link">♻️ Rücknahmeprogramm</a>
   <a href="#faq" class="mm-link">FAQ</a>
 </div>
 
@@ -851,15 +933,19 @@ footer{background:var(--green-xdark);color:rgba(255,255,255,.65);padding:72px 0 
         <div class="wheel-stock">
           <div class="stock-row">
             <span class="stock-label">10% Rabatt</span>
-            <span class="stock-badge s10" id="stock10">42 verfügbar</span>
+            <span class="stock-badge s10" id="stock10">100 verfügbar</span>
           </div>
           <div class="stock-row">
             <span class="stock-label">15% Rabatt</span>
-            <span class="stock-badge s15" id="stock15">35 verfügbar</span>
+            <span class="stock-badge s15" id="stock15">50 verfügbar</span>
           </div>
           <div class="stock-row">
             <span class="stock-label">20% Rabatt</span>
-            <span class="stock-badge s20" id="stock20">23 verfügbar</span>
+            <span class="stock-badge s20" id="stock20">25 verfügbar</span>
+          </div>
+          <div class="stock-row" style="border:1px solid rgba(245,158,11,.4);background:rgba(245,158,11,.08)">
+            <span class="stock-label" style="color:#f59e0b">🎁 Komplett-Set</span>
+            <span class="stock-badge" id="stockset" style="background:#f59e0b;color:#fff">5 verfügbar</span>
           </div>
         </div>
         <p class="wheel-once-note">🔒 Einmal pro Tag drehbar · Codes 14 Tage gültig</p>
@@ -1103,6 +1189,64 @@ footer{background:var(--green-xdark);color:rgba(255,255,255,.65);padding:72px 0 
   </div>
 </section>
 
+<!-- FROSTBOX -->
+<section id="frostbox">
+  <div class="container">
+    <div class="fb-banner">
+      <div class="reveal">
+        <div class="fb-logos">
+          <span class="fb-logo-fv">FreshVault</span>
+          <span class="fb-logo-sep">×</span>
+          <span class="fb-logo-fb">FrostBox</span>
+        </div>
+        <h2 class="fb-title">Gemeinsam gegen<br><em>Food Waste.</em></h2>
+        <p class="fb-desc">FrostBox liefert frische Bio-Lebensmittel direkt an deine Tür – FreshVault organisiert und verwaltet sie smart. Zusammen die perfekte Kombination für nachhaltige Haushaltsführung.</p>
+        <ul class="fb-benefits">
+          <li class="fb-benefit"><div class="fb-benefit-icon">🚚</div><div>Frische Lieferboxen direkt nach Hause – immer zur richtigen Zeit</div></li>
+          <li class="fb-benefit"><div class="fb-benefit-icon">📱</div><div>Automatische App-Synchronisation: FrostBox-Inhalte landen direkt in deiner FreshVault-Liste</div></li>
+          <li class="fb-benefit"><div class="fb-benefit-icon">♻️</div><div>Gemeinsam bis zu 60% weniger Lebensmittelverschwendung im Haushalt</div></li>
+          <li class="fb-benefit"><div class="fb-benefit-icon">💚</div><div>Exklusiv: 10% Rabatt auf dein erstes FrostBox-Abo für alle FreshVault-Kunden</div></li>
+        </ul>
+        <div class="fb-actions">
+          <a href="#" class="btn btn-fb">FrostBox entdecken →</a>
+          <span class="btn btn-fb-out btn" style="cursor:default">Mehr erfahren</span>
+        </div>
+        <p class="fb-partnership-note">🤝 Offizielle Kooperationspartnerschaft seit 2025</p>
+      </div>
+      <div class="fb-visual reveal reveal-delay-2">
+        <div class="fb-card">
+          <span class="fb-card-icon">📦</span>
+          <div class="fb-card-text">
+            <strong>Wöchentliche Bio-Box</strong>
+            <span>Saisonales Gemüse & Obst, regional bezogen</span>
+          </div>
+        </div>
+        <div class="fb-card">
+          <span class="fb-card-icon">❄️</span>
+          <div class="fb-card-text">
+            <strong>Automatisch eingelagert</strong>
+            <span>FreshVault erkennt die Produkte & weist Zonen zu</span>
+          </div>
+        </div>
+        <div class="fb-card">
+          <span class="fb-card-icon">🍽️</span>
+          <div class="fb-card-text">
+            <strong>Passende Rezepte</strong>
+            <span>Die App schlägt Gerichte aus deiner Box vor</span>
+          </div>
+        </div>
+        <div class="fb-card">
+          <span class="fb-card-icon">📊</span>
+          <div class="fb-card-text">
+            <strong>Verbrauchsauswertung</strong>
+            <span>Sieh, was du wirklich isst – und optimiere deine Box</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- PRICING -->
 <section id="pricing">
   <div class="container">
@@ -1241,6 +1385,69 @@ footer{background:var(--green-xdark);color:rgba(255,255,255,.65);padding:72px 0 
   </div>
 </section>
 
+<!-- RUECKNAHME -->
+<section id="ruecknahme">
+  <div class="container">
+    <div class="rueck-inner">
+      <div class="reveal">
+        <div class="badge rueck-badge">♻️ Nachhaltig zurückgeben</div>
+        <h2 class="section-title">Rücknahmeprogramm</h2>
+        <p class="section-sub">Gib dein altes FreshVault Gerät zurück – wir recyceln es nachhaltig und du bekommst <strong>20&nbsp;€ Rabatt</strong> auf dein nächstes Gerät.</p>
+        <div class="rueck-highlight">
+          <span class="rueck-highlight-icon">💚</span>
+          <div>
+            <h4>So funktioniert's</h4>
+            <p>Fülle das Formular aus. Wir melden uns innerhalb von 2 Werktagen mit einem Rücksendeetikett. Nach Eingang des Geräts erhältst du deinen 20&nbsp;€ Gutschein per E-Mail.</p>
+          </div>
+        </div>
+      </div>
+      <div class="form-card reveal reveal-delay-1">
+        <div id="rueckForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="rf-name">Name *</label>
+              <input class="form-control" id="rf-name" type="text" placeholder="Max Mustermann" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="rf-email">E-Mail *</label>
+              <input class="form-control" id="rf-email" type="email" placeholder="max@beispiel.de" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="rf-adresse">Adresse *</label>
+            <input class="form-control" id="rf-adresse" type="text" placeholder="Musterstraße 1, 12345 Berlin" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="rf-serial">Seriennummer *</label>
+            <input class="form-control" id="rf-serial" type="text" placeholder="FV-XXXXXXXX" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="rf-grund">Grund der Rückgabe *</label>
+            <select class="form-control" id="rf-grund" required>
+              <option value="">Bitte wählen …</option>
+              <option>Upgrade auf neues Modell</option>
+              <option>Gerät defekt</option>
+              <option>Nicht mehr benötigt</option>
+              <option>Umzug / Haushalt aufgelöst</option>
+              <option>Sonstiges</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="rf-msg">Nachricht (optional)</label>
+            <textarea class="form-control" id="rf-msg" placeholder="Zusätzliche Informationen zum Gerät oder zur Rückgabe …"></textarea>
+          </div>
+          <button class="btn btn-primary form-submit" id="rfSubmitBtn" type="button">Anfrage absenden</button>
+        </div>
+        <div class="form-success" id="rueckSuccess">
+          <span class="form-success-icon">✅</span>
+          <h3>Anfrage erfolgreich gesendet!</h3>
+          <p>Vielen Dank! Wir melden uns innerhalb von 2 Werktagen per E-Mail mit deinem kostenlosen Rücksendeetikett.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- FOOTER -->
 <footer>
   <div class="container">
@@ -1374,24 +1581,24 @@ footer{background:var(--green-xdark);color:rgba(255,255,255,.65);padding:72px 0 
 
   // ── WHEEL ─────────────────────────────────────────
   (function(){
-    const PRICE = 322;
+    const PRICE = 344.99;
     const LS_KEY = 'fv_wheel_played';
     const LS_STOCK = 'fv_wheel_stock';
 
-    // Segment definitions: label, probability weight, discount (0=niete), color
+    // Segment definitions — weights sum to 100 → exact target probabilities
     const SEGMENTS_DEF = [
-      {label:'Niete',     w:9,  disc:0,  color:'#d1d5db'},
-      {label:'10% Rabatt',w:6,  disc:10, color:'#74c69d'},
-      {label:'Niete',     w:9,  disc:0,  color:'#e5e7eb'},
-      {label:'15% Rabatt',w:3,  disc:15, color:'#40916c'},
-      {label:'Niete',     w:9,  disc:0,  color:'#d1d5db'},
-      {label:'10% Rabatt',w:6,  disc:10, color:'#2d6a4f'},
-      {label:'Niete',     w:9,  disc:0,  color:'#e5e7eb'},
-      {label:'20% Rabatt',w:2,  disc:20, color:'#1b4332'},
-      {label:'Niete',     w:9,  disc:0,  color:'#d1d5db'},
-      {label:'10% Rabatt',w:6,  disc:10, color:'#52b788'},
-      {label:'Niete',     w:9,  disc:0,  color:'#e5e7eb'},
-      {label:'15% Rabatt',w:3,  disc:15, color:'#b7e4c7'},
+      {label:'Niete',      w:9,   disc:0,        color:'#d1d5db'},
+      {label:'10% Rabatt', w:10,  disc:10,        color:'#74c69d'},
+      {label:'Niete',      w:9,   disc:0,        color:'#e5e7eb'},
+      {label:'15% Rabatt', w:7.5, disc:15,        color:'#40916c'},
+      {label:'Niete',      w:9,   disc:0,        color:'#d1d5db'},
+      {label:'10% Rabatt', w:10,  disc:10,        color:'#2d6a4f'},
+      {label:'Niete',      w:9,   disc:0,        color:'#e5e7eb'},
+      {label:'20% Rabatt', w:8,   disc:20,        color:'#1b4332'},
+      {label:'Niete',      w:9,   disc:0,        color:'#d1d5db'},
+      {label:'10% Rabatt', w:10,  disc:10,        color:'#52b788'},
+      {label:'🎁 Komplett!',w:2,  disc:'komplett',color:'#f59e0b'},
+      {label:'15% Rabatt', w:7.5, disc:15,        color:'#b7e4c7'},
     ];
     const N = SEGMENTS_DEF.length;
     const SEG_ANG = (2 * Math.PI) / N;
@@ -1399,26 +1606,27 @@ footer{background:var(--green-xdark);color:rgba(255,255,255,.65);padding:72px 0 
     // Stock management
     function loadStock(){
       const s = localStorage.getItem(LS_STOCK);
-      return s ? JSON.parse(s) : {10:42, 15:35, 20:23};
+      return s ? JSON.parse(s) : {10:100, 15:50, 20:25, komplett:5};
     }
     function saveStock(s){ localStorage.setItem(LS_STOCK, JSON.stringify(s)); }
 
     function updateStockUI(){
       const s = loadStock();
-      function setEl(id, cls, n){
+      function setEl(id, cls, n, isSet){
         const el = document.getElementById(id);
         if(!el) return;
         if(n <= 0){
           el.textContent = 'Ausverkauft';
-          el.className = 'stock-badge empty';
+          el.style.cssText = 'background:rgba(255,255,255,.15);color:rgba(255,255,255,.4)';
         } else {
           el.textContent = n + ' verfügbar';
-          el.className = 'stock-badge ' + cls;
+          if(!isSet) el.className = 'stock-badge ' + cls;
         }
       }
       setEl('stock10','s10', s[10]);
       setEl('stock15','s15', s[15]);
       setEl('stock20','s20', s[20]);
+      setEl('stockset','sset', s.komplett, true);
     }
 
     // Canvas drawing
@@ -1503,12 +1711,13 @@ footer{background:var(--green-xdark);color:rgba(255,255,255,.65);padding:72px 0 
     applyPlayedState();
     updateStockUI();
 
-    // Weighted random pick
+    // Weighted random pick — disabled segments get w:0
     function pickSegment(){
       const stock = loadStock();
-      // Build effective segments: disable disc segments if stock empty
-      const effective = SEGMENTS_DEF.map((s,i) => {
-        if(s.disc > 0 && stock[s.disc] <= 0) return {...s, w:0};
+      const effective = SEGMENTS_DEF.map(s => {
+        if(s.disc === 0) return s;
+        const key = s.disc === 'komplett' ? 'komplett' : s.disc;
+        if(stock[key] <= 0) return {...s, w:0};
         return s;
       });
       const total = effective.reduce((a,s) => a+s.w, 0);
@@ -1520,7 +1729,6 @@ footer{background:var(--green-xdark);color:rgba(255,255,255,.65);padding:72px 0 
       return N-1;
     }
 
-    // Code generation
     function makeCode(pct){
       const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
       let s = '';
@@ -1528,48 +1736,34 @@ footer{background:var(--green-xdark);color:rgba(255,255,255,.65);padding:72px 0 
       return `FV${pct}-${s}`;
     }
 
-    // Expiry date string
     function expiryStr(){
       const d = new Date();
       d.setDate(d.getDate()+14);
       return d.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'});
     }
 
-    // Spin!
     spinBtn.addEventListener('click', function(){
       if(hasPlayedToday() || spinBtn.disabled) return;
       spinBtn.disabled = true;
-
       const target = pickSegment();
-      // Spin: land on target segment center, add 5–8 full rotations
       const extraSpins = (5 + Math.floor(Math.random()*4)) * 2 * Math.PI;
-      // target angle: we want pointer (top = -PI/2 in canvas coords) to point at segment center
-      // segment i center is at i*SEG_ANG + SEG_ANG/2 from base
       const targetAngle = -(target * SEG_ANG + SEG_ANG/2);
-      // current rotation mod 2PI
       const curMod = ((rotation % (2*Math.PI)) + 2*Math.PI) % (2*Math.PI);
       const targetMod = ((targetAngle % (2*Math.PI)) + 2*Math.PI) % (2*Math.PI);
       let delta = targetMod - curMod;
       if(delta <= 0) delta += 2*Math.PI;
       const totalRotation = rotation + extraSpins + delta;
-
       const duration = 4200;
       const start = performance.now();
       const startRot = rotation;
-
       function easeOut(t){ return 1 - Math.pow(1-t, 4); }
-
       function animate(now){
         const elapsed = now - start;
         const t = Math.min(elapsed / duration, 1);
         rotation = startRot + (totalRotation - startRot) * easeOut(t);
         drawWheel(rotation);
         if(t < 1){ requestAnimationFrame(animate); }
-        else {
-          rotation = totalRotation;
-          drawWheel(rotation);
-          showResult(target);
-        }
+        else { rotation = totalRotation; drawWheel(rotation); showResult(target); }
       }
       requestAnimationFrame(animate);
     });
@@ -1582,26 +1776,35 @@ footer{background:var(--green-xdark);color:rgba(255,255,255,.65);padding:72px 0 
       const stock = loadStock();
 
       if(seg.disc === 0){
+        // Niete
         document.getElementById('wmIcon').textContent = '😔';
         document.getElementById('wmTitle').textContent = 'Leider eine Niete!';
         document.getElementById('wmWin').style.display = 'none';
         document.getElementById('wmMsg').textContent = 'Kein Glück diesmal – aber morgen hast du eine neue Chance! Viel Erfolg beim nächsten Versuch.';
+      } else if(seg.disc === 'komplett'){
+        // Jackpot: komplettes FreshVault Set
+        stock.komplett = Math.max(0, stock.komplett - 1);
+        saveStock(stock);
+        updateStockUI();
+        document.getElementById('wmIcon').textContent = '🏆';
+        document.getElementById('wmTitle').textContent = 'Unglaublich – Komplett-Set gewonnen!';
+        document.getElementById('wmWin').style.display = 'none';
+        document.getElementById('wmMsg').innerHTML =
+          'Du hast das <strong>komplette FreshVault System</strong> gewonnen! 🎉<br><br>' +
+          'Melde dich innerhalb von 7 Tagen unter <strong>hello@freshvault.app</strong> mit dem Betreff <em>„JACKPOT – Komplett-Set"</em> – wir senden dir dein Gerät kostenlos zu.';
       } else {
+        // Discount code
         const code = makeCode(seg.disc);
         const saving = ((PRICE * seg.disc) / 100).toFixed(2).replace('.',',');
-        // Decrement stock
         stock[seg.disc] = Math.max(0, stock[seg.disc]-1);
         saveStock(stock);
         updateStockUI();
-
         document.getElementById('wmIcon').textContent = '🎉';
         document.getElementById('wmTitle').textContent = `${seg.disc}% Rabatt gewonnen!`;
         document.getElementById('wmWin').style.display = '';
         document.getElementById('wmSavings').textContent = `Du sparst ${saving} € auf dein FreshVault System!`;
         document.getElementById('wmCode').textContent = code;
         document.getElementById('wmMsg').textContent = `Gib den Code beim Checkout ein. Gültig bis ${expiryStr()}.`;
-
-        // copy button
         const copyBtn = document.getElementById('wmCopyBtn');
         copyBtn.onclick = function(){
           navigator.clipboard.writeText(code).then(()=>{
@@ -1620,6 +1823,33 @@ footer{background:var(--green-xdark);color:rgba(255,255,255,.65);padding:72px 0 
     document.getElementById('wheelModal').addEventListener('click', e=>{
       if(e.target === document.getElementById('wheelModal'))
         document.getElementById('wheelModal').classList.remove('active');
+    });
+  })();
+
+  // ── Rücknahme form
+  (function(){
+    const btn = document.getElementById('rfSubmitBtn');
+    if(!btn) return;
+    btn.addEventListener('click', function(){
+      const fields = ['rf-name','rf-email','rf-adresse','rf-serial','rf-grund'];
+      let valid = true;
+      fields.forEach(id => {
+        const el = document.getElementById(id);
+        if(!el) return;
+        if(!el.value.trim()){
+          el.classList.add('error');
+          valid = false;
+          el.addEventListener('input', () => el.classList.remove('error'), {once:true});
+        }
+      });
+      // simple email check
+      const em = document.getElementById('rf-email');
+      if(em && em.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em.value)){
+        em.classList.add('error'); valid = false;
+      }
+      if(!valid) return;
+      document.getElementById('rueckForm').style.display = 'none';
+      document.getElementById('rueckSuccess').style.display = 'block';
     });
   })();
 
